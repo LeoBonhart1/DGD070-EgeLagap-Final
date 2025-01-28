@@ -27,7 +27,8 @@ public class GameController : MonoBehaviour
         return new Feature("Game")
             .Add(new MovementSystem(contexts))
             .Add(new PadSystem(contexts))
-            .Add(new ViewSystem(contexts));
+            .Add(new ViewSystem(contexts))
+            .Add(new DestroySystem(contexts));
     }
 
     private void InitializeGame()

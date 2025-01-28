@@ -24,6 +24,9 @@ public class PadSystem : IExecuteSystem
         var gameStateEntity = _gameStates.GetSingleEntity();
         if (gameStateEntity == null) return;
 
+        // Don't process pad activation if game is already won
+        if (gameStateEntity.gameState.isGameWon) return;
+
         foreach (var pad in _pads)
         {
             if (!pad.pad.isActivated && Vector3.Distance(player.position.value, pad.position.value) < 1f)
@@ -40,6 +43,9 @@ public class PadSystem : IExecuteSystem
                 {
                     gameStateEntity.ReplaceGameState(true, gameStateEntity.gameState.activatedPadsCount);
                     Debug.Log("A WINRAR IS YOU");
+
+                    // Mark player for destruction
+                    player.isDestroy = true;
                 }
             }
         }

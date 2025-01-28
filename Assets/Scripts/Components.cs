@@ -43,3 +43,6 @@ public sealed class GameStateComponent : IComponent
     public bool isGameWon;
     public int activatedPadsCount;
 }
+
+[Game]
+public sealed class DestroyComponent : IComponent { }
