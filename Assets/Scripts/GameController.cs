@@ -1,10 +1,14 @@
 using UnityEngine;
 using Entitas;
+using TMPro;
 
 public class GameController : MonoBehaviour
 {
     private Systems _systems;
     private Contexts _contexts;
+    [SerializeField] private TextMeshProUGUI winText;
+    [SerializeField] private GameObject player;  // Reference to player in hierarchy
+    [SerializeField] private GameObject[] pads;  // Array of pad objects in hierarchy
 
     void Start()
     {
@@ -26,42 +30,32 @@ public class GameController : MonoBehaviour
     {
         return new Feature("Game")
             .Add(new MovementSystem(contexts))
-            .Add(new PadSystem(contexts))
+            .Add(new PadSystem(contexts, winText))
             .Add(new ViewSystem(contexts))
             .Add(new DestroySystem(contexts));
     }
 
     private void InitializeGame()
     {
-        // Create player
-        var player = _contexts.game.CreateEntity();
-        player.isPlayer = true;
-        player.AddPosition(Vector3.zero);
-        player.AddMovementSpeed(5f);
-        player.AddView(GameObject.CreatePrimitive(PrimitiveType.Sphere));
-        player.AddBoundary(-8f, 8f, -4f, 4f);
+        // Create player entity
+        var playerEntity = _contexts.game.CreateEntity();
+        playerEntity.isPlayer = true;
+        playerEntity.AddPosition(player.transform.position);
+        playerEntity.AddMovementSpeed(5f);
+        playerEntity.AddView(player);
+        playerEntity.AddBoundary(-8f, 8f, -4f, 4f);
 
-        // Create pads
-        CreatePad(new Vector3(-5f, 0f, 3f));
-        CreatePad(new Vector3(5f, 0f, 3f));
-        CreatePad(new Vector3(-5f, 0f, -3f));
-        CreatePad(new Vector3(5f, 0f, -3f));
+        // Create pad entities
+        foreach (var padObject in pads)
+        {
+            var padEntity = _contexts.game.CreateEntity();
+            padEntity.AddPad(false);
+            padEntity.AddPosition(padObject.transform.position);
+            padEntity.AddView(padObject);
+        }
 
         // Initialize game state
         var gameState = _contexts.game.CreateEntity();
         gameState.AddGameState(false, 0);
-    }
-
-    private void CreatePad(Vector3 position)
-    {
-        var pad = _contexts.game.CreateEntity();
-        pad.AddPad(false);
-        pad.AddPosition(position);
-
-        var padObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        padObject.transform.position = position;
-        padObject.transform.localScale = new Vector3(1f, 0.1f, 1f);
-
-        pad.AddView(padObject);
     }
 }
