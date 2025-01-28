@@ -17,14 +17,12 @@ public class DestroySystem : IExecuteSystem
 
     public void Execute()
     {
-        // Clear and fill buffer
         _buffer.Clear();
         foreach (var entity in _destroyEntities)
         {
             _buffer.Add(entity);
         }
 
-        // Process buffer
         foreach (var entity in _buffer)
         {
             if (entity.hasView)

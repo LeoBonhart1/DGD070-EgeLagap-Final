@@ -7,8 +7,8 @@ public class GameController : MonoBehaviour
     private Systems _systems;
     private Contexts _contexts;
     [SerializeField] private TextMeshProUGUI winText;
-    [SerializeField] private GameObject player;  // Reference to player in hierarchy
-    [SerializeField] private GameObject[] pads;  // Array of pad objects in hierarchy
+    [SerializeField] private GameObject player; 
+    [SerializeField] private GameObject[] pads;  
 
     void Start()
     {
@@ -30,6 +30,7 @@ public class GameController : MonoBehaviour
     {
         return new Feature("Game")
             .Add(new MovementSystem(contexts))
+            .Add(new PadTriggerSystem(contexts))
             .Add(new PadSystem(contexts, winText))
             .Add(new ViewSystem(contexts))
             .Add(new DestroySystem(contexts));
@@ -37,7 +38,6 @@ public class GameController : MonoBehaviour
 
     private void InitializeGame()
     {
-        // Create player entity
         var playerEntity = _contexts.game.CreateEntity();
         playerEntity.isPlayer = true;
         playerEntity.AddPosition(player.transform.position);
@@ -45,7 +45,6 @@ public class GameController : MonoBehaviour
         playerEntity.AddView(player);
         playerEntity.AddBoundary(-8f, 8f, -4f, 4f);
 
-        // Create pad entities
         foreach (var padObject in pads)
         {
             var padEntity = _contexts.game.CreateEntity();
@@ -54,7 +53,6 @@ public class GameController : MonoBehaviour
             padEntity.AddView(padObject);
         }
 
-        // Initialize game state
         var gameState = _contexts.game.CreateEntity();
         gameState.AddGameState(false, 0);
     }

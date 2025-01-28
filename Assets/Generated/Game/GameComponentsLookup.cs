@@ -15,9 +15,10 @@ public static class GameComponentsLookup {
     public const int Pad = 4;
     public const int Player = 5;
     public const int Position = 6;
-    public const int View = 7;
+    public const int Trigger = 7;
+    public const int View = 8;
 
-    public const int TotalComponents = 8;
+    public const int TotalComponents = 9;
 
     public static readonly string[] componentNames = {
         "Boundary",
@@ -27,6 +28,7 @@ public static class GameComponentsLookup {
         "Pad",
         "Player",
         "Position",
+        "Trigger",
         "View"
     };
 
@@ -38,6 +40,7 @@ public static class GameComponentsLookup {
         typeof(PadComponent),
         typeof(PlayerComponent),
         typeof(PositionComponent),
+        typeof(TriggerComponent),
         typeof(ViewComponent)
     };
 }

@@ -1,41 +1,40 @@
 using Entitas;
 using UnityEngine;
 using TMPro;
+using System.Collections.Generic;
 
-public class PadSystem : IExecuteSystem
+public class PadSystem : ReactiveSystem<GameEntity>
 {
     private readonly GameContext _context;
-    private readonly IGroup<GameEntity> _players;
-    private readonly IGroup<GameEntity> _pads;
-    private readonly IGroup<GameEntity> _gameStates;
     private readonly TextMeshProUGUI _winText;
 
-    public PadSystem(Contexts contexts, TextMeshProUGUI winText)
+    public PadSystem(Contexts contexts, TextMeshProUGUI winText) : base(contexts.game)
     {
         _context = contexts.game;
-        _players = _context.GetGroup(GameMatcher.AllOf(GameMatcher.Player, GameMatcher.Position));
-        _pads = _context.GetGroup(GameMatcher.AllOf(GameMatcher.Pad, GameMatcher.Position));
-        _gameStates = _context.GetGroup(GameMatcher.GameState);
         _winText = winText;
     }
 
-    public void Execute()
+    protected override ICollector<GameEntity> GetTrigger(IContext<GameEntity> context)
     {
-        var player = _players.GetSingleEntity();
-        if (player == null) return;
+        return context.CreateCollector(GameMatcher.Trigger);
+    }
 
-        var gameStateEntity = _gameStates.GetSingleEntity();
+    protected override bool Filter(GameEntity entity)
+    {
+        return entity.hasPad && entity.isTrigger;
+    }
+
+    protected override void Execute(List<GameEntity> entities)
+    {
+        var gameStateEntity = _context.GetGroup(GameMatcher.GameState).GetSingleEntity();
         if (gameStateEntity == null) return;
 
-        // Don't process pad activation if game is already won
-        if (gameStateEntity.gameState.isGameWon) return;
-
-        foreach (var pad in _pads)
+        foreach (var entity in entities)
         {
-            if (!pad.pad.isActivated && Vector3.Distance(player.position.value, pad.position.value) < 1f)
+            if (!entity.pad.isActivated)
             {
-                pad.pad.isActivated = true;
-                pad.view.gameObject.GetComponent<Renderer>().material.color = Color.green;
+                entity.pad.isActivated = true;
+                entity.view.gameObject.GetComponent<Renderer>().material.color = Color.green;
 
                 gameStateEntity.ReplaceGameState(
                     gameStateEntity.gameState.isGameWon,
@@ -51,9 +50,15 @@ public class PadSystem : IExecuteSystem
                         _winText.gameObject.SetActive(true);
                     }
 
-                    player.isDestroy = true;
+                    var player = _context.GetGroup(GameMatcher.Player).GetSingleEntity();
+                    if (player != null)
+                    {
+                        player.isDestroy = true;
+                    }
                 }
             }
+
+            entity.isTrigger = false;
         }
     }
 }
